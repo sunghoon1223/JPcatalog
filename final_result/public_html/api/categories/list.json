@@ -1,0 +1,33 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "1",
+      "name": "AGV 캐스터",
+      "slug": "agv-casters",
+      "description": "자동 안내 차량용 특수 캐스터",
+      "image": "/images/category-agv.jpg"
+    },
+    {
+      "id": "2",
+      "name": "장비용 캐스터",
+      "slug": "equipment-casters",
+      "description": "산업 장비용 고강도 캐스터",
+      "image": "/images/category-equipment.jpg"
+    },
+    {
+      "id": "3",
+      "name": "폴리우레탄 휠",
+      "slug": "polyurethane-wheels",
+      "description": "내구성과 탄성이 뛰어난 폴리우레탄 휠",
+      "image": "/images/category-polyurethane.jpg"
+    },
+    {
+      "id": "4",
+      "name": "러버 휠",
+      "slug": "rubber-wheels",
+      "description": "충격 흡수가 우수한 고무 휠",
+      "image": "/images/category-rubber.jpg"
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+:root {
+  --catalogue-accent-start: #facc15;
+  --catalogue-accent-end: #f97316;
+  --catalogue-accent-text: #111827;
+}
+
+body.catalogue-mode {
+  font-synthesis: style;
+}
+
+body.catalogue-mode [data-catalogue-hidden] {
+  display: none !important;
+}
+
+.catalogue-contact-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.75rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--catalogue-accent-text);
+  background-image: linear-gradient(90deg, var(--catalogue-accent-start), var(--catalogue-accent-end));
+  box-shadow: 0 12px 22px rgba(249, 115, 22, 0.25);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.catalogue-contact-button:hover,
+.catalogue-contact-button:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(249, 115, 22, 0.3);
+  filter: brightness(1.02);
+}
+
+.catalogue-contact-button:focus-visible {
+  outline: 2px solid rgba(17, 24, 39, 0.35);
+  outline-offset: 2px;
+}
+
+.catalogue-price-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.catalogue-price-label:hover,
+.catalogue-price-label:focus-visible {
+  color: #1d4ed8;
+  text-decoration: underline;
+  outline: none;
+}
+
+.catalogue-price-label:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.3);
+  outline-offset: 2px;
+}
+
+/* Thinner search input line */
+input[type="search"], .search input, input[name*="search" i] {
+  border-width: 1px !important;
+  border-color: #cbd5e1 !important; /* slate-300 */
+  outline: none !important;
+}
+
+/* Remove underline hover in header/nav */
+header a, nav a { text-decoration: none !important; }
+header a:hover, nav a:hover { text-decoration: none !important; }
+
+/* Product detail spacing & button shape */
+.catalogue-mode button, .catalogue-mode .btn, .catalogue-mode a.button {
+  padding: 0.5rem 0.75rem !important;
+  white-space: normal !important;
+}
+.catalogue-mode .catalogue-section + .catalogue-section {
+  border-top: 1px solid #e5e7eb; /* gray-200 */
+  padding-top: 16px;
+  margin-top: 16px;
+}

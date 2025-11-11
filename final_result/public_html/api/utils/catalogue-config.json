@@ -1,0 +1,29 @@
+{
+  "filters": {
+    "cat_agv": {
+      "exclude_slug_contains": ["me263"],
+      "exclude_name_contains": ["ME263"]
+    },
+    "cat_industrial": {
+      "include_slug_contains": [
+        "eq053tj",
+        "eq053cyfw",
+        "eq053cyzd",
+        "eq053zdfw",
+        "eq053",
+        "eq063",
+        "eq093"
+      ],
+      "include_name_contains": [
+        "EQ053TJ",
+        "EQ053CYFW",
+        "EQ053CYZD",
+        "EQ053ZDFW",
+        "EQ053",
+        "EQ063",
+        "EQ093"
+      ]
+    }
+  }
+}
+

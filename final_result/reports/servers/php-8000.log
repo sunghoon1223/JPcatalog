@@ -1,0 +1,13 @@
+[Tue Nov 11 12:47:13 2025] PHP 8.3.6 Development Server (http://127.0.0.1:8000) started
+[Tue Nov 11 12:47:18 2025] 127.0.0.1:46862 Accepted
+[Tue Nov 11 12:47:18 2025] PHP Warning:  Constant RUBBER_METADATA_PATH already defined in /mnt/c/rebuild_e2e/public_html/api/utils/catalogue.php on line 52
+[Tue Nov 11 12:47:18 2025] PHP Warning:  Constant POLYURETHANE_METADATA_PATH already defined in /mnt/c/rebuild_e2e/public_html/api/utils/catalogue.php on line 53
+[Tue Nov 11 12:47:18 2025] PHP Warning:  Constant EQUIPMENT_METADATA_PATH already defined in /mnt/c/rebuild_e2e/public_html/api/utils/catalogue.php on line 54
+[Tue Nov 11 12:47:21 2025] 127.0.0.1:46862 [200]: GET /api/products/list.php?category=agv-casters&limit=200
+[Tue Nov 11 12:47:21 2025] 127.0.0.1:46862 Closing
+[Tue Nov 11 12:47:21 2025] 127.0.0.1:56246 Accepted
+[Tue Nov 11 12:47:21 2025] PHP Warning:  Constant RUBBER_METADATA_PATH already defined in /mnt/c/rebuild_e2e/public_html/api/utils/catalogue.php on line 52
+[Tue Nov 11 12:47:21 2025] PHP Warning:  Constant POLYURETHANE_METADATA_PATH already defined in /mnt/c/rebuild_e2e/public_html/api/utils/catalogue.php on line 53
+[Tue Nov 11 12:47:21 2025] PHP Warning:  Constant EQUIPMENT_METADATA_PATH already defined in /mnt/c/rebuild_e2e/public_html/api/utils/catalogue.php on line 54
+[Tue Nov 11 12:47:22 2025] 127.0.0.1:56246 [200]: GET /api/products/list.php?category=industrial-casters&limit=200
+[Tue Nov 11 12:47:22 2025] 127.0.0.1:56246 Closing

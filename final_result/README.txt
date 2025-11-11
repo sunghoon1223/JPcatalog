@@ -1,7 +1,7 @@
-Final Result Package
+Final Result Package (EJ-integrated UI)
 
 Contents:
-- public_html/: Deployable document root with final UI bundle and API
+- public_html/: Deployable document root with EJ-integrated UI bundle and API
 - reports/api/: Sample API outputs used for verification
 - reports/servers/: PHP dev server log (if available)
 

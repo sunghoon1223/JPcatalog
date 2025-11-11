@@ -892,11 +892,30 @@ function catalogue_format_product(array $record, array $categoryMap): array
     }
 
     if ($overrideMeta) {
+        // When overrides exist, filter out crawled product images to avoid duplicates
+        $normalizedGallery = array_filter($normalizedGallery, function($url) {
+            $u = strtolower($url);
+            // Keep non-crawled images
+            if (strpos($u, '/images/crawled/') === false) return true;
+            // Keep crawled drawing images
+            if (preg_match('#/images/crawled/.*/drawing/#i', $u)) return true;
+            // Remove crawled product/gallery images (overrides will replace them)
+            return false;
+        });
+        $normalizedGallery = array_values($normalizedGallery); // re-index
+
+        // Add override images
         $normalizedGallery = array_merge(
             $normalizedGallery,
             $overrideMeta['product_images'] ?? [],
             $overrideMeta['drawing_images'] ?? []
         );
+
+        // If overrides exist, use first product_image as main
+        $overrideProducts = $overrideMeta['product_images'] ?? [];
+        if (!empty($overrideProducts) && is_string($overrideProducts[0])) {
+            $mainImage = $overrideProducts[0];
+        }
     }
 
     // Remove preview/small/qr/banner thumbnails before dedupe
@@ -1145,8 +1164,12 @@ function catalogue_format_product(array $record, array $categoryMap): array
 
     $mainImage = $chooseMain($normalizedGallery, $imagesMap, $mainImage);
 
-    // Prefer Supabase-provided main if available
-    $finalMain = $supabaseMain !== null ? $supabaseMain : $mainImage;
+    // Prefer override main if overrides exist, otherwise prefer Supabase-provided main
+    if ($overrideMeta && $mainImage !== null) {
+        $finalMain = $mainImage;
+    } else {
+        $finalMain = $supabaseMain !== null ? $supabaseMain : $mainImage;
+    }
 
     if ($finalMain !== null && !$isPlaceholder($finalMain)) {
         if (!isset($imagesMap[$finalMain])) {

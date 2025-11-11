@@ -162,10 +162,43 @@ function catalogue_normalize_media_path(?string $path): ?string
     // If still not a real file under the web root, fall back to a placeholder
     $absCandidate = $webRoot !== false ? ($webRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $candidate)) : null;
     if (!($absCandidate && is_file($absCandidate))) {
-        $placeholder = 'jpcaster/placeholder.svg';
-        $absPlaceholder = $webRoot !== false ? ($webRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $placeholder)) : null;
-        if ($absPlaceholder && is_file($absPlaceholder)) {
-            $candidate = $placeholder;
+        // Attempt to map to overrides by basename (e.g., agv_164_gallery_01.jpg)
+        $pathPart = parse_url($candidate, PHP_URL_PATH);
+        $base = is_string($pathPart) ? basename($pathPart) : basename($candidate);
+        if ($base !== '' && preg_match('/^(agv|equipment|polyurethane|rubber)_(\d+)_/i', $base, $m)) {
+            $cat = strtolower($m[1]);
+            $pid = $m[2];
+            $ovr = 'images/overrides/files/' . $cat . '/' . $pid . '/' . $base;
+            $absOvr = $webRoot !== false ? ($webRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $ovr)) : null;
+            if ($absOvr && is_file($absOvr)) {
+                $candidate = $ovr;
+            } else {
+                // Fallback: pick any available file in the overrides folder for this id
+                $dir = $webRoot !== false ? ($webRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, 'images/overrides/files/' . $cat . '/' . $pid)) : null;
+                if ($dir && is_dir($dir)) {
+                    $dh = opendir($dir);
+                    if ($dh !== false) {
+                        while (($fn = readdir($dh)) !== false) {
+                            if ($fn === '.' || $fn === '..') continue;
+                            $abs = $dir . DIRECTORY_SEPARATOR . $fn;
+                            if (is_file($abs)) {
+                                $candidate = 'images/overrides/files/' . $cat . '/' . $pid . '/' . $fn;
+                                break;
+                            }
+                        }
+                        closedir($dh);
+                    }
+                }
+            }
+        }
+        // Final fallback: placeholder
+        $absCandidate = $webRoot !== false ? ($webRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $candidate)) : null;
+        if (!($absCandidate && is_file($absCandidate))) {
+            $placeholder = 'jpcaster/placeholder.svg';
+            $absPlaceholder = $webRoot !== false ? ($webRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $placeholder)) : null;
+            if ($absPlaceholder && is_file($absPlaceholder)) {
+                $candidate = $placeholder;
+            }
         }
     }
 
@@ -825,6 +858,7 @@ function catalogue_format_product(array $record, array $categoryMap): array
 
     $rawMainImage = is_string($record['main_image_url'] ?? null) ? $record['main_image_url'] : null;
     $mainImage = catalogue_normalize_media_path($rawMainImage);
+    $supabaseMain = $mainImage; // preserve original main from record when present
     if ($mainImage === null) {
         $mainImage = $imageUrls[0] ?? null;
     }
@@ -858,11 +892,30 @@ function catalogue_format_product(array $record, array $categoryMap): array
     }
 
     if ($overrideMeta) {
+        // When overrides exist, filter out crawled product images to avoid duplicates
+        $normalizedGallery = array_filter($normalizedGallery, function($url) {
+            $u = strtolower($url);
+            // Keep non-crawled images
+            if (strpos($u, '/images/crawled/') === false) return true;
+            // Keep crawled drawing images
+            if (preg_match('#/images/crawled/.*/drawing/#i', $u)) return true;
+            // Remove crawled product/gallery images (overrides will replace them)
+            return false;
+        });
+        $normalizedGallery = array_values($normalizedGallery); // re-index
+
+        // Add override images
         $normalizedGallery = array_merge(
             $normalizedGallery,
             $overrideMeta['product_images'] ?? [],
             $overrideMeta['drawing_images'] ?? []
         );
+
+        // If overrides exist, use first product_image as main
+        $overrideProducts = $overrideMeta['product_images'] ?? [];
+        if (!empty($overrideProducts) && is_string($overrideProducts[0])) {
+            $mainImage = $overrideProducts[0];
+        }
     }
 
     // Remove preview/small/qr/banner thumbnails before dedupe
@@ -873,6 +926,7 @@ function catalogue_format_product(array $record, array $categoryMap): array
         if (strpos($u, 'thumbnail') !== false || strpos($u, 'thumb_') !== false || strpos($u, 'thumb-') !== false) return true;
         if (strpos($u, '/_filtered_out/qr/') !== false || strpos($u, '/qr/') !== false) return true;
         if (strpos($u, '/_filtered_out/banners/') !== false || strpos($u, '/banners/') !== false) return true;
+        if (strpos($u, '/placeholder.svg') !== false) return true;
         return false;
     };
     $normalizedGallery = array_values(array_filter($normalizedGallery, function($u) use ($isPreviewSmall) {
@@ -992,7 +1046,13 @@ function catalogue_format_product(array $record, array $categoryMap): array
 
     $matchesProductGallery = function (string $url): bool {
         $lower = strtolower($url);
+        // Paths under crawled .../images/gallery/
         if (preg_match('#/images/(?:[^/]+/)*images/gallery/#i', $lower)) {
+            return true;
+        }
+        // Overrides copied files whose basename carries _gallery_
+        $basename = basename(parse_url($lower, PHP_URL_PATH) ?: $lower);
+        if (strpos($basename, '_gallery_') !== false) {
             return true;
         }
         if (strpos($lower, '_product_') !== false) {
@@ -1045,8 +1105,22 @@ function catalogue_format_product(array $record, array $categoryMap): array
     }
     unset($entry);
 
+    // Boost: treat current main candidate as product to preserve Supabase intent
+    if ($mainImage !== null && !$isPlaceholder($mainImage)) {
+        if (!isset($imagesMap[$mainImage])) {
+            $imagesMap[$mainImage] = ['url' => $mainImage];
+        }
+        if (!isset($imagesMap[$mainImage]['role'])) {
+            $imagesMap[$mainImage]['role'] = 'product';
+        }
+    }
+
     // Prefer a product photo as main image if available
     $chooseMain = function(array $gallery, array $map, ?string $current) use ($isPlaceholder) {
+        // Prefer the provided current main (Supabase) when available
+        if ($current !== null && !$isPlaceholder($current)) {
+            return $current;
+        }
         $scoreImage = function (?string $url) use ($map, $isPlaceholder): ?int {
             if ($url === null) {
                 return null;
@@ -1090,12 +1164,19 @@ function catalogue_format_product(array $record, array $categoryMap): array
 
     $mainImage = $chooseMain($normalizedGallery, $imagesMap, $mainImage);
 
-    if ($mainImage !== null && !$isPlaceholder($mainImage)) {
-        if (!isset($imagesMap[$mainImage])) {
-            $imagesMap[$mainImage] = ['url' => $mainImage];
+    // Prefer override main if overrides exist, otherwise prefer Supabase-provided main
+    if ($overrideMeta && $mainImage !== null) {
+        $finalMain = $mainImage;
+    } else {
+        $finalMain = $supabaseMain !== null ? $supabaseMain : $mainImage;
+    }
+
+    if ($finalMain !== null && !$isPlaceholder($finalMain)) {
+        if (!isset($imagesMap[$finalMain])) {
+            $imagesMap[$finalMain] = ['url' => $finalMain];
         }
-        if (!isset($imagesMap[$mainImage]['role'])) {
-            $imagesMap[$mainImage]['role'] = 'product';
+        if (!isset($imagesMap[$finalMain]['role'])) {
+            $imagesMap[$finalMain]['role'] = 'product';
         }
     }
     $images = array_values($imagesMap);
@@ -1123,14 +1204,14 @@ function catalogue_format_product(array $record, array $categoryMap): array
         'stock_status' => $record['stock_status'] ?? 'instock',
         'weight' => $record['weight'] ?? null,
         'manufacturer' => $record['manufacturer'] ?? null,
-        'main_image_url' => $mainImage,
-        'mainImageUrl' => $mainImage,
-        'primary_image_url' => $mainImage,
-        'primaryImageUrl' => $mainImage,
+        'main_image_url' => $finalMain,
+        'mainImageUrl' => $finalMain,
+        'primary_image_url' => $finalMain,
+        'primaryImageUrl' => $finalMain,
         'image_urls' => $normalizedGallery,
         'imageUrls' => $normalizedGallery,
-        'gallery' => $normalizedGallery,
-        'galleryImages' => $normalizedGallery,
+        'gallery' => array_values(array_unique(array_merge([$finalMain], $normalizedGallery))),
+        'galleryImages' => array_values(array_unique(array_merge([$finalMain], $normalizedGallery))),
         'image_count' => count($normalizedGallery),
         'images' => $images,
         'tags' => $tags,

@@ -4,14 +4,7 @@
       "product_images": [
         "/images/overrides/files/agv/164/agv_164_product_1.jpg",
         "/images/overrides/files/agv/164/agv_164_product_2.jpg",
-        "/images/overrides/files/agv/164/agv_164_product_3.jpg",
-        "/images/overrides/files/agv/164/agv_164_gallery_01.jpg",
-        "/images/overrides/files/agv/164/agv_164_gallery_02.jpg",
-        "/images/overrides/files/agv/164/agv_164_gallery_03.jpg",
-        "/images/overrides/files/agv/164/agv_164_product_10.jpg",
-        "/images/overrides/files/agv/164/agv_164_product_5.jpg",
-        "/images/overrides/files/agv/164/agv_164_product_6.jpg",
-        "/images/overrides/files/agv/164/agv_164_product_9.jpg"
+        "/images/overrides/files/agv/164/agv_164_product_3.jpg"
       ],
       "drawing_images": [
         "/images/overrides/files/agv/164/agv_164_drawing_1.jpg",
@@ -381,8 +374,7 @@
     "427": {
       "product_images": [
         "/images/overrides/files/agv/427/agv_427_product_1.jpg",
-        "/images/overrides/files/agv/427/agv_427_product_2.jpg",
-        "/images/overrides/files/agv/427/agv_427_product_3.jpg"
+        "/images/overrides/files/agv/427/agv_427_product_2.jpg"
       ],
       "drawing_images": [
         "/images/overrides/files/agv/427/agv_427_product_3.jpg",

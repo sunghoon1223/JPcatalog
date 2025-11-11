@@ -16,7 +16,7 @@ $supabase_url = rtrim(
 $supabase_key = getenv('SUPABASE_ANON_KEY')
     ?: getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
     ?: getenv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY')
-    ?: 'sb_publishable_NRzhcehsa_tDtdXOOt4q9w_7mwWmgTB';
+    ?: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqcWFkaHprb3hkd3lmc2dscnZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5ODE4MjksImV4cCI6MjA2NzU1NzgyOX0.aOWT_5FrDBxGADHeziRVFusvo6YGW_-IDbgib-rSQlg';
 
 /**
  * Performs a Supabase REST request.
